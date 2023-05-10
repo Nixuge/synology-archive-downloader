@@ -1,0 +1,69 @@
+{
+    "/download/Firmware": {
+        "files": [],
+        "inner_urls": [
+            "/download/Firmware/Camera"
+        ]
+    },
+    "/download/Firmware/Camera": {
+        "files": [],
+        "inner_urls": [
+            "/download/Firmware/Camera/BC500",
+            "/download/Firmware/Camera/TC500"
+        ]
+    },
+    "/download/Firmware/Camera/BC500": {
+        "files": [],
+        "inner_urls": [
+            "/download/Firmware/Camera/BC500/1.0.3-0147",
+            "/download/Firmware/Camera/BC500/1.0.2-0142"
+        ]
+    },
+    "/download/Firmware/Camera/TC500": {
+        "files": [],
+        "inner_urls": [
+            "/download/Firmware/Camera/TC500/1.0.3-0147",
+            "/download/Firmware/Camera/TC500/1.0.2-0142"
+        ]
+    },
+    "/download/Firmware/Camera/TC500/1.0.3-0147": {
+        "files": [
+            {
+                "url": "https://global.synologydownload.com/download/Firmware/TC500/1.0.3-0147/Synology_TC500_1.0.3_0147.sa.bin",
+                "Last modified": "Wed, 26 Apr 2023 05:36:07 GMT",
+                "Size": "30.25MB"
+            }
+        ],
+        "inner_urls": []
+    },
+    "/download/Firmware/Camera/BC500/1.0.3-0147": {
+        "files": [
+            {
+                "url": "https://global.synologydownload.com/download/Firmware/BC500/1.0.3-0147/Synology_BC500_1.0.3_0147.sa.bin",
+                "Last modified": "Wed, 26 Apr 2023 05:35:57 GMT",
+                "Size": "30.26MB"
+            }
+        ],
+        "inner_urls": []
+    },
+    "/download/Firmware/Camera/TC500/1.0.2-0142": {
+        "files": [
+            {
+                "url": "https://global.synologydownload.com/download/Firmware/TC500/1.0.2-0142/Synology_TC500_1.0.2_0142.sa.bin",
+                "Last modified": "Thu, 09 Mar 2023 05:29:20 GMT",
+                "Size": "30.26MB"
+            }
+        ],
+        "inner_urls": []
+    },
+    "/download/Firmware/Camera/BC500/1.0.2-0142": {
+        "files": [
+            {
+                "url": "https://global.synologydownload.com/download/Firmware/BC500/1.0.2-0142/Synology_BC500_1.0.2_0142.sa.bin",
+                "Last modified": "Thu, 09 Mar 2023 05:29:15 GMT",
+                "Size": "30.25MB"
+            }
+        ],
+        "inner_urls": []
+    }
+}

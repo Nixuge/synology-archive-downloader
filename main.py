@@ -3,53 +3,56 @@ from __future__ import annotations # return type of current class
 import asyncio
 from dataclasses import dataclass
 import json
+import os
 from typing import Callable
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 import httpx
 from asyncio import Task
 
-@dataclass
-class File:
-    path: str
-    date: str
-    size: str
+# @dataclass
+# class File:
+#     path: str
+#     date: str
+#     size: str
 
-    def to_dict(self) -> dict:
-        return {
-            "path": self.path,
-            "date": self.date,
-            "size": self.size
-        }
+#     def to_dict(self) -> dict:
+#         return {
+#             "path": self.path,
+#             "date": self.date,
+#             "size": self.size
+#         }
 
-    @staticmethod
-    def from_dict(data: dict) -> File:
-        return File(
-            path=data.get("path"),
-            date=data.get("date"),
-            size=data.get("size")
-        )
+#     @staticmethod
+#     def from_dict(data: dict) -> File:
+#         return File(
+#             path=data.get("path"),
+#             date=data.get("date"),
+#             size=data.get("size")
+#         )
     
 
-def get_grabbed_urls() -> dict:
-    with open("data.json", "r") as file:
-        data = json.load(file)
-    return data
-
-
-files: list[File] = []
+failed_urls: list[str] = []
+files: list[dict] = []
 BASE_URL = "https://archive.synology.com"
 EPIC_STRING = "Downloaded/Remaining tasks: {downloaded!s}/{remaining!s}, Running tasks: {running_tasks!s} (failed:{failed!s}, skipped:{skipped!s})    "
+FILE_VERSION = "v3"
+POLLING_SLEEP = .2
+
 
 class DATA:
     total_failed = 0
     skipped = 0
     json_lock = False
+    json_file = ""
 
-POLLING_SLEEP = .2
 
+def get_grabbed_urls() -> dict:
+    with open(DATA.json_file, "r") as file:
+        data = json.load(file)
+    return data
 
-async def set_grabbed_urls(url: str, files: list[File], inner_urls: list[str]):
+async def set_grabbed_urls(url: str, files: list[dict], inner_urls: list[str]):
     while DATA.json_lock == True:
         await asyncio.sleep(.01)
         await set_grabbed_urls(url, files, inner_urls)
@@ -61,50 +64,70 @@ async def set_grabbed_urls(url: str, files: list[File], inner_urls: list[str]):
         return
 
     current_data[url] = {
-        "files": [file.to_dict() for file in files],
+        "files": files,
         "inner_urls": inner_urls
     }
 
-    with open("data.json", "w") as file:
+    with open(DATA.json_file, "w") as file:
         json.dump(current_data, file, indent=4)
+        
     DATA.json_lock = False
 
 
 class PageGrabber:
+    def get_tags(self, header: Tag):
+        tr = header.find("tr")
+        fields: list[Tag] = tr.find_all("th", {"scope": "col"})
+        # print()
+        fields_list: list[str] = [field.text for field in fields]
+        fields_list.pop(0)
+        return fields_list
+
+    async def handleException(self, url: str, message: str = "") -> list[Callable]:
+        print(message)
+        DATA.total_failed += 1
+
+        # temp debug handling
+        # failed_urls.append(url)
+        # return []
+
+        # permanent normal handling
+        await asyncio.sleep(3)
+        return await self.get_page(url)
+
     async def get_page(self, url: str) -> list[Callable]:
         full_url = url if "http" in url else BASE_URL + url
 
         grabbed_keys = get_grabbed_urls()
-        if full_url in grabbed_keys.keys():
+        if url in grabbed_keys.keys():
             DATA.skipped += 1
             url_dict = grabbed_keys[full_url]
 
             for inner_file in url_dict["files"]:
-                files.append(File.from_dict(inner_file))
-            
+                files.append(inner_file)
             return [self.get_page(inner_url) for inner_url in url_dict["inner_urls"]]
     
         try:
-            r = await httpx.AsyncClient().get(full_url)
+            r = await httpx.AsyncClient().get(full_url, timeout=15)
         except Exception as e:
-            # print(f"exception ! {e} for url {url}")
-            DATA.total_failed += 1
-            await asyncio.sleep(3)
-            return await self.get_page(url)
+            return await self.handleException(url, f"exception! {type(e)} for url {url}")
+
+        if r.status_code != 200:
+            print(full_url)
+            return await self.handleException(url, f"Non-200 status code! {url} ({r.status_code})")
 
 
         soup = BeautifulSoup(r.text, "lxml")
         body: Tag = soup.find("tbody")
+        header: Tag = soup.find("thead")
         try:
             rows: list[Tag] = body.find_all("tr")
+            tags: list[str] = self.get_tags(header)
         except:
-            print(f"Error ! {body} {url}")
-            DATA.total_failed += 1
-            await asyncio.sleep(3)
-            return await self.get_page(url)
+            return await self.handleException(url, f"Error ! {body} {url}")
         
         current_subfolders: list[str] = []
-        current_files: list[File] = []
+        current_files: list[dict] = []
 
         for row in rows:
             th = row.find("th")
@@ -118,9 +141,11 @@ class PageGrabber:
                 # print("Added folder " + href)
             else:
                 tds: list[Tag] = row.find_all("td")
-                date = tds[0].text
-                size = tds[1].text
-                file = File(href, date, size)
+
+                file = {"url": href}
+                for index, tag in enumerate(tags):
+                    file[tag] = tds[index].text
+
                 current_files.append(file)
         
         await set_grabbed_urls(full_url, current_files, current_subfolders)
@@ -132,9 +157,10 @@ class PageGrabber:
 
 
 async def wait_all_tasks(to_call: list[Callable]) -> list[Callable]:
+    DATA.skipped = 0
     tasks: list[Task] = []
     callable_to_return: list[Callable] = []
-    max_task_count = 30
+    max_task_count = 100
     done_tasks_count = 0
     while True:
         for element in to_call:
@@ -174,15 +200,78 @@ async def grab_everything(callable: list[Callable]):
     if len(result) > 0:
         await grab_everything(result)
 
-async def main():
+async def getTaskSetJson(path):
+    DATA.json_file = f"data/{FILE_VERSION}/{path}.json"
+    try:
+        get_grabbed_urls()
+    except:
+        if not os.path.exists(f"data/{FILE_VERSION}/"):
+            os.makedirs(f"data/{FILE_VERSION}/")
+        with open(DATA.json_file, "w") as file:
+            file.write("{}")
+
     pg = PageGrabber()
-    tasks = await pg.get_page("/download/Os")
-    await grab_everything(tasks)
- 
+    tasks = await pg.get_page(f"/download/{path}") 
+    
+    return await grab_everything(tasks)
+
+async def main():
+    # done
+    await getTaskSetJson("Os")
+    await getTaskSetJson("Firmware")
+    await getTaskSetJson("ToolChain")
+    await getTaskSetJson("Utility")
+    await getTaskSetJson("Mobile")
+    await getTaskSetJson("ChromeApp")
+    await getTaskSetJson("Package")
+    for cat in ["Os", "Package", "Utility", "Mobile", "ChromeApp", "ToolChain", "Firmware"]:
+        count_size(cat)
+
+    # todo
+    
+
+def str_to_kb(size_str: str):
+    size: float
+    if "MB" in size_str:
+        size = float(size_str.replace("MB", "").replace(",", "").strip()) * 1_000
+    elif "KB" in size_str:
+        size = float(size_str.replace("KB", "").replace(",", "").strip())
+    elif "GB" in size_str:
+        size = float(size_str.replace("GB", "").replace(",", "").strip()) * 1_000_000
+    else:
+        print("TF?" + size_str)
+    return size
+
+def count_size(path: str):
+    DATA.json_file = f"data/{FILE_VERSION}/{path}.json"
+
+    file_count = 0
+    file_no_size = 0
+    total_filesize_kb = 0
+
+    urls_dict: dict = get_grabbed_urls()
+    for key, val in urls_dict.items():
+        file_count += 1
+        for file in val["files"]:
+            size = file.get("Size")
+            if not size:
+                file_no_size += 1
+                continue
+            total_filesize_kb += str_to_kb(size)
+    print(f"===== CATEGORY: {path} =====")
+    print(f"Filecount: {file_count} ({file_no_size} without a size)")
+    print(f"Total files size: {int(total_filesize_kb/1_000)}MB ({int(total_filesize_kb/1_000_000)}GB)")
+    print()
+
 
 async def test_ip():
     print((await httpx.AsyncClient().get("https://api.ipify.org/")).text)
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+    # for file in failed_urls:
+    #     print("https://archive.synology.com" + file)
+    # print(len(failed_urls))
+
     # asyncio.run(test_ip())

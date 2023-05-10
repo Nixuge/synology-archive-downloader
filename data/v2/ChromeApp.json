@@ -1,0 +1,195 @@
+{
+    "/download/ChromeApp": {
+        "files": [],
+        "inner_urls": [
+            "/download/ChromeApp/NoteStationClipper",
+            "/download/ChromeApp/OfficeExtension"
+        ]
+    },
+    "/download/ChromeApp/NoteStationClipper": {
+        "files": [],
+        "inner_urls": [
+            "/download/ChromeApp/NoteStationClipper/3.0-0117",
+            "/download/ChromeApp/NoteStationClipper/2.0-0111",
+            "/download/ChromeApp/NoteStationClipper/2.0-0102",
+            "/download/ChromeApp/NoteStationClipper/2.0-0098",
+            "/download/ChromeApp/NoteStationClipper/2.0-0096",
+            "/download/ChromeApp/NoteStationClipper/2.0-0095",
+            "/download/ChromeApp/NoteStationClipper/2.0-0094",
+            "/download/ChromeApp/NoteStationClipper/2.0-0093",
+            "/download/ChromeApp/NoteStationClipper/2.0-0092",
+            "/download/ChromeApp/NoteStationClipper/2.0-0091",
+            "/download/ChromeApp/NoteStationClipper/2.0-0066",
+            "/download/ChromeApp/NoteStationClipper/2.0-0064",
+            "/download/ChromeApp/NoteStationClipper/2.0-0049",
+            "/download/ChromeApp/NoteStationClipper/2.0-0046",
+            "/download/ChromeApp/NoteStationClipper/1.0-0025"
+        ]
+    },
+    "/download/ChromeApp/OfficeExtension": {
+        "files": [],
+        "inner_urls": [
+            "/download/ChromeApp/OfficeExtension/1.0.1"
+        ]
+    },
+    "/download/ChromeApp/NoteStationClipper/3.0-0117": {
+        "files": [
+            {
+                "url": "https://global.synologydownload.com/download/Addons/NoteStationClipper/3.0-0117/SynologyWebClipper-3.0-0117.crx",
+                "Last modified": "Wed, 08 Feb 2023 02:33:41 GMT",
+                "Size": "3.72MB"
+            }
+        ],
+        "inner_urls": []
+    },
+    "/download/ChromeApp/NoteStationClipper/2.0-0094": {
+        "files": [
+            {
+                "url": "https://global.synologydownload.com/download/Addons/NoteStationClipper/2.0-0094/NoteStationClipper-2.0-0094.crx",
+                "Last modified": "Fri, 03 Feb 2017 06:50:28 GMT",
+                "Size": "3.65MB"
+            }
+        ],
+        "inner_urls": []
+    },
+    "/download/ChromeApp/NoteStationClipper/2.0-0095": {
+        "files": [
+            {
+                "url": "https://global.synologydownload.com/download/Addons/NoteStationClipper/2.0-0095/NoteStationClipper-2.0-0095.crx",
+                "Last modified": "Mon, 05 Jun 2017 13:28:59 GMT",
+                "Size": "3.67MB"
+            }
+        ],
+        "inner_urls": []
+    },
+    "/download/ChromeApp/NoteStationClipper/2.0-0102": {
+        "files": [
+            {
+                "url": "https://global.synologydownload.com/download/Addons/NoteStationClipper/2.0-0102/NoteStationClipper-2.0-0102.crx",
+                "Last modified": "Mon, 15 Apr 2019 07:49:18 GMT",
+                "Size": "3.70MB"
+            }
+        ],
+        "inner_urls": []
+    },
+    "/download/ChromeApp/NoteStationClipper/2.0-0096": {
+        "files": [
+            {
+                "url": "https://global.synologydownload.com/download/Addons/NoteStationClipper/2.0-0096/NoteStationClipper-2.0-0096.crx",
+                "Last modified": "Mon, 18 Dec 2017 10:23:24 GMT",
+                "Size": "3.68MB"
+            }
+        ],
+        "inner_urls": []
+    },
+    "/download/ChromeApp/NoteStationClipper/2.0-0049": {
+        "files": [
+            {
+                "url": "https://global.synologydownload.com/download/Addons/NoteStationClipper/2.0-0049/NoteStationClipper-2.0-0049.crx",
+                "Last modified": "Thu, 14 Jan 2016 03:11:41 GMT",
+                "Size": "3.60MB"
+            }
+        ],
+        "inner_urls": []
+    },
+    "/download/ChromeApp/NoteStationClipper/2.0-0046": {
+        "files": [
+            {
+                "url": "https://global.synologydownload.com/download/Addons/NoteStationClipper/2.0-0046/NoteStationClipper-2.0-0046.crx",
+                "Last modified": "Thu, 08 Oct 2015 09:57:06 GMT",
+                "Size": "3.58MB"
+            }
+        ],
+        "inner_urls": []
+    },
+    "/download/ChromeApp/NoteStationClipper/2.0-0111": {
+        "files": [
+            {
+                "url": "https://global.synologydownload.com/download/Addons/NoteStationClipper/2.0-0111/SynologyWebClipper-2.0-0111.crx",
+                "Last modified": "Thu, 21 Jul 2022 07:44:20 GMT",
+                "Size": "3.67MB"
+            }
+        ],
+        "inner_urls": []
+    },
+    "/download/ChromeApp/NoteStationClipper/2.0-0092": {
+        "files": [
+            {
+                "url": "https://global.synologydownload.com/download/Addons/NoteStationClipper/2.0-0092/NoteStationClipper-2.0-0092.crx",
+                "Last modified": "Wed, 20 Jul 2016 08:25:49 GMT",
+                "Size": "3.64MB"
+            }
+        ],
+        "inner_urls": []
+    },
+    "/download/ChromeApp/NoteStationClipper/2.0-0091": {
+        "files": [
+            {
+                "url": "https://global.synologydownload.com/download/Addons/NoteStationClipper/2.0-0091/NoteStationClipper-2.0-0091.crx",
+                "Last modified": "Thu, 02 Jun 2016 10:41:34 GMT",
+                "Size": "3.64MB"
+            }
+        ],
+        "inner_urls": []
+    },
+    "/download/ChromeApp/NoteStationClipper/2.0-0066": {
+        "files": [
+            {
+                "url": "https://global.synologydownload.com/download/Addons/NoteStationClipper/2.0-0066/NoteStationClipper-2.0-0066.crx",
+                "Last modified": "Tue, 08 Mar 2016 09:53:20 GMT",
+                "Size": "3.63MB"
+            }
+        ],
+        "inner_urls": []
+    },
+    "/download/ChromeApp/NoteStationClipper/2.0-0098": {
+        "files": [
+            {
+                "url": "https://global.synologydownload.com/download/Addons/NoteStationClipper/2.0-0098/NoteStationClipper-2.0-0098.crx",
+                "Last modified": "Fri, 27 Apr 2018 09:41:40 GMT",
+                "Size": "3.68MB"
+            }
+        ],
+        "inner_urls": []
+    },
+    "/download/ChromeApp/NoteStationClipper/2.0-0064": {
+        "files": [
+            {
+                "url": "https://global.synologydownload.com/download/Addons/NoteStationClipper/2.0-0064/NoteStationClipper-2.0-0064.crx",
+                "Last modified": "Fri, 19 Feb 2016 09:30:29 GMT",
+                "Size": "3.63MB"
+            }
+        ],
+        "inner_urls": []
+    },
+    "/download/ChromeApp/NoteStationClipper/2.0-0093": {
+        "files": [
+            {
+                "url": "https://global.synologydownload.com/download/Addons/NoteStationClipper/2.0-0093/NoteStationClipper-2.0-0093.crx",
+                "Last modified": "Mon, 05 Dec 2016 09:21:31 GMT",
+                "Size": "3.65MB"
+            }
+        ],
+        "inner_urls": []
+    },
+    "/download/ChromeApp/OfficeExtension/1.0.1": {
+        "files": [
+            {
+                "url": "https://global.synologydownload.com/download/Addons/OfficeExtension/1.0.1/synoffice-extension-1.0.1.crx",
+                "Last modified": "Thu, 31 Oct 2019 07:27:17 GMT",
+                "Size": "63.62KB"
+            }
+        ],
+        "inner_urls": []
+    },
+    "/download/ChromeApp/NoteStationClipper/1.0-0025": {
+        "files": [
+            {
+                "url": "https://global.synologydownload.com/download/Addons/NoteStationClipper/1.0-0025/NoteStationClipper-1.0-0025.crx",
+                "Last modified": "Fri, 07 Aug 2015 01:50:18 GMT",
+                "Size": "3.23MB"
+            }
+        ],
+        "inner_urls": []
+    }
+}
