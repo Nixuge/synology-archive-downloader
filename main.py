@@ -35,12 +35,13 @@ from asyncio import Task
 failed_urls: list[str] = []
 files: list[dict] = []
 BASE_URL = "https://archive.synology.com"
-EPIC_STRING = "Downloaded/Remaining tasks: {downloaded!s}/{remaining!s}, Running tasks: {running_tasks!s} (failed:{failed!s}, skipped:{skipped!s})    "
+EPIC_STRING = "Downloaded/Remaining tasks: {downloaded!s}/{remaining!s}, Running tasks: {running_tasks!s} (success: {success!s}|fail:{failed!s}|skip:{skipped!s})    "
 FILE_VERSION = "v3"
 POLLING_SLEEP = .2
 
 
 class DATA:
+    successful_noskip = 0
     total_failed = 0
     skipped = 0
     json_lock = False
@@ -101,7 +102,7 @@ class PageGrabber:
         grabbed_keys = get_grabbed_urls()
         if url in grabbed_keys.keys():
             DATA.skipped += 1
-            url_dict = grabbed_keys[full_url]
+            url_dict = grabbed_keys[url]
 
             for inner_file in url_dict["files"]:
                 files.append(inner_file)
@@ -133,7 +134,7 @@ class PageGrabber:
             th = row.find("th")
             if not th: continue
 
-            href = th.find("a").get("href")
+            href = th.find("a").get("href").replace("https://archive.synology.com", "")
             svg = th.find("svg")
 
             if "bi-folder" in svg.get("class"):
@@ -148,7 +149,7 @@ class PageGrabber:
 
                 current_files.append(file)
         
-        await set_grabbed_urls(full_url, current_files, current_subfolders)
+        await set_grabbed_urls(url, current_files, current_subfolders)
     
         for file in current_files:
             files.append(current_files)
@@ -158,6 +159,7 @@ class PageGrabber:
 
 async def wait_all_tasks(to_call: list[Callable]) -> list[Callable]:
     DATA.skipped = 0
+    DATA.successful_noskip = 0
     tasks: list[Task] = []
     callable_to_return: list[Callable] = []
     max_task_count = 100
@@ -187,7 +189,8 @@ async def wait_all_tasks(to_call: list[Callable]) -> list[Callable]:
             running_tasks=len(tasks),
             # failed=0
             failed=DATA.total_failed,
-            skipped=DATA.skipped
+            skipped=DATA.skipped,
+            success=DATA.successful_noskip
         ), end="\r")
 
         await asyncio.sleep(POLLING_SLEEP)
@@ -201,6 +204,7 @@ async def grab_everything(callable: list[Callable]):
         await grab_everything(result)
 
 async def getTaskSetJson(path):
+    print(f"======= Grabbing category {path} =======")
     DATA.json_file = f"data/{FILE_VERSION}/{path}.json"
     try:
         get_grabbed_urls()
@@ -213,10 +217,10 @@ async def getTaskSetJson(path):
     pg = PageGrabber()
     tasks = await pg.get_page(f"/download/{path}") 
     
-    return await grab_everything(tasks)
+    await grab_everything(tasks)
+    print(f"======= Done with category {path} =======")
 
-async def main():
-    # done
+async def grab_all():
     await getTaskSetJson("Os")
     await getTaskSetJson("Firmware")
     await getTaskSetJson("ToolChain")
@@ -226,8 +230,6 @@ async def main():
     await getTaskSetJson("Package")
     for cat in ["Os", "Package", "Utility", "Mobile", "ChromeApp", "ToolChain", "Firmware"]:
         count_size(cat)
-
-    # todo
     
 
 def str_to_kb(size_str: str):
@@ -267,8 +269,8 @@ def count_size(path: str):
 async def test_ip():
     print((await httpx.AsyncClient().get("https://api.ipify.org/")).text)
 
-if __name__ == "__main__":
-    asyncio.run(main())
+# if __name__ == "__main__":
+    # asyncio.run(main())
 
     # for file in failed_urls:
     #     print("https://archive.synology.com" + file)

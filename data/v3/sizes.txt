@@ -1,0 +1,27 @@
+===== CATEGORY: Os =====
+Filecount: 488 (0 without a size)
+Total files size: 1420326MB (1420GB)
+
+===== CATEGORY: Package =====
+Filecount: 3421 (0 without a size)
+Total files size: 653915MB (653GB)
+
+===== CATEGORY: Utility =====
+Filecount: 497 (0 without a size)
+Total files size: 96328MB (96GB)
+
+===== CATEGORY: Mobile =====
+Filecount: 536 (0 without a size)
+Total files size: 18043MB (18GB)
+
+===== CATEGORY: ChromeApp =====
+Filecount: 19 (0 without a size)
+Total files size: 54MB (0GB)
+
+===== CATEGORY: ToolChain =====
+Filecount: 15 (11088 without a size)
+Total files size: 0MB (0GB)
+
+===== CATEGORY: Firmware =====
+Filecount: 8 (0 without a size)
+Total files size: 121MB (0GB)
