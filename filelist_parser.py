@@ -220,7 +220,7 @@ async def getTaskSetJson(path):
     await grab_everything(tasks)
     print(f"======= Done with category {path} =======")
 
-async def grab_all():
+async def download_all():
     await getTaskSetJson("Os")
     await getTaskSetJson("Firmware")
     await getTaskSetJson("ToolChain")
