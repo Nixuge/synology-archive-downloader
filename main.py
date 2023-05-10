@@ -8,4 +8,4 @@ categories = ("Os", "Package", "Utility", "Mobile", "ChromeApp", "ToolChain", "F
 if __name__ == "__main__":
     # asyncio.run(grab_all())
     # asyncio.run(save_all_all_categories())
-    asyncio.run(save_category("ChromeApp"))
+    asyncio.run(save_category("ToolChain"))

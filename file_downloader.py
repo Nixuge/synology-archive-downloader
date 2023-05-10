@@ -54,6 +54,7 @@ class AsyncLimiter:
     tasks: list[Task]
     remaining_elements: list
     done_tasks_count: int
+    skipped_tasks_count: int
     print_progress_str: str
     polling_sleep: float
     max_task_count: int
@@ -61,12 +62,13 @@ class AsyncLimiter:
 
     def __init__(self,
                  function_to_task, #Function to call
-                 print_progress_str: str = "Downloaded/Remaining tasks: {downloaded!s}/{remaining!s}, Running tasks: {running_tasks!s} ({failed_tasks!s} failed)     ",
+                 print_progress_str: str = "Downloaded: {downloaded!s} ({failed_tasks!s} fails, {skipped_tasks!s} skips), Remaining: {remaining!s}, Running: {running_tasks!s}     ",
                  max_task_count: int = 20,
                  polling_sleep: float = .2
                  ) -> None:
         self.done_tasks_count = 0
         self.failed_tasks_count = 0
+        self.skipped_tasks_count = 0
         self.remaining_elements = []
         self.tasks = []
         self.print_progress_str = print_progress_str
@@ -88,6 +90,10 @@ class AsyncLimiter:
         self.remaining_elements.append(element)
         return False
 
+    def skip(self):
+        self.done_tasks_count -= 1
+        self.skipped_tasks_count += 1
+
     async def download_all(self):
         while True:    
             for element in self.remaining_elements:
@@ -103,9 +109,10 @@ class AsyncLimiter:
 
             print(self.print_progress_str.format(
                 downloaded=self.done_tasks_count,
-                remaining=len(self.remaining_elements),
+                remaining=len(self.remaining_elements) + len(self.tasks),
                 running_tasks=len(self.tasks),
-                failed_tasks=self.failed_tasks_count
+                failed_tasks=self.failed_tasks_count,
+                skipped_tasks=self.skipped_tasks_count
             ), end="\r")
 
             if len(self.tasks) == 0:
@@ -118,14 +125,14 @@ class AsyncLimiter:
 
 class Downloader(AsyncLimiter):
     def __init__(self) -> None:
-        super().__init__(self.download_file, max_task_count=30, polling_sleep=.05)
+        super().__init__(self.download_file, max_task_count=5, polling_sleep=.05)
     
     async def download_file(self, url: str):
         final_path = url.replace("https://global.synologydownload.com/", "")
         final_folder = os.path.dirname(final_path)
 
         if os.path.isfile(final_path):
-            return
+            return self.skip()
         
         if not os.path.isdir(final_folder):
             os.makedirs(final_folder)
