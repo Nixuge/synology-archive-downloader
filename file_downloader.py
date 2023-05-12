@@ -1,5 +1,6 @@
 from asyncio import Task
 import asyncio
+import gc
 import hashlib
 import json
 import os
@@ -125,7 +126,7 @@ class AsyncLimiter:
 
 class Downloader(AsyncLimiter):
     def __init__(self) -> None:
-        super().__init__(self.download_file, max_task_count=5, polling_sleep=.05)
+        super().__init__(self.download_file, max_task_count=40, polling_sleep=.02)
     
     async def download_file(self, url: str):
         final_path = url.replace("https://global.synologydownload.com/", "")
@@ -159,4 +160,6 @@ class Downloader(AsyncLimiter):
         
         shutil.move(temp_filename, final_path)
 
+        gc.collect()
+        
         return True

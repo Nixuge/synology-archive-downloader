@@ -162,7 +162,7 @@ async def wait_all_tasks(to_call: list[Callable]) -> list[Callable]:
     DATA.successful_noskip = 0
     tasks: list[Task] = []
     callable_to_return: list[Callable] = []
-    max_task_count = 100
+    max_task_count = 20
     done_tasks_count = 0
     while True:
         for element in to_call:
