@@ -18,7 +18,10 @@ categories = ("Os", "Package", "Utility", "Mobile", "ChromeApp", "ToolChain", "F
 existing_keys = ("url", "Last modified", "Size", "Platform", "MD5")
 
 def get_file_path(file_data: dict):
-    return (urllib.parse.unquote(file_data["url"]))
+    url = urllib.parse.unquote(file_data["url"])
+    # fix for LITTERALLY 1 FILE IN PACKAGES THAT HAS \n AND \r IN ITS URL
+    # https://global.synologydownload.com/download/Package/spk/DHCPServer/1.0-2281/DHCPServer-x64\r\n-1.0-2281.spk
+    return url.replace("\n", "").replace("\r", "")
     # .replace("https://global.synologydownload.com/", "") 
     # for file_value in file_data.values():
     #     if "%" in file_value and not "%20" in file_value and not "%2B" in file_value:
@@ -36,8 +39,8 @@ def get_grabbed_urls(json_file) -> dict:
         data = json.load(file)
     return data
 
-async def save_category(json_file) -> list:
-    downloader = Downloader()
+async def save_category(json_file, async_limit: int = 20) -> list:
+    downloader = Downloader(async_count=async_limit)
     data = get_grabbed_urls("data/v3/" + json_file + ".json")
     for url_data in data.values():
         files = url_data["files"]
@@ -125,8 +128,8 @@ class AsyncLimiter:
 
 
 class Downloader(AsyncLimiter):
-    def __init__(self) -> None:
-        super().__init__(self.download_file, max_task_count=40, polling_sleep=.02)
+    def __init__(self, async_count: int = 40) -> None:
+        super().__init__(self.download_file, max_task_count=async_count, polling_sleep=.02)
     
     async def download_file(self, url: str):
         final_path = url.replace("https://global.synologydownload.com/", "")
@@ -146,6 +149,8 @@ class Downloader(AsyncLimiter):
         try:
             r = await client.get(url)
         except:
+            print("FAILED FOR URL:", url)
+            print("FINAL PATH: ", final_path)
             return self.fail(url)
         
         temp_filename = random_string()

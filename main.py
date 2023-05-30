@@ -9,5 +9,14 @@ categories = ("Os", "Package", "Utility", "Mobile", "ChromeApp", "ToolChain", "F
 if __name__ == "__main__":
     # asyncio.run(download_all())
     # asyncio.run(save_all_all_categories())
-    asyncio.run(save_category("Package2"))
+    
+    asyncio.run(save_category("Package1", async_limit=50))
+    asyncio.run(save_category("Package2", async_limit=50))
+    asyncio.run(save_category("Utility", async_limit=50))
+    asyncio.run(save_category("Mobile", async_limit=50))
+    asyncio.run(save_category("ChromeApp", async_limit=50))
+    asyncio.run(save_category("ToolChain", async_limit=50))
+    asyncio.run(save_category("Firmware", async_limit=50))
+
+    asyncio.run(save_category("Os1", async_limit=50))
     # print(file_counter("download/ToolChain"))
