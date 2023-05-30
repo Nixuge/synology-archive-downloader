@@ -40,6 +40,7 @@ def get_grabbed_urls(json_file) -> dict:
     return data
 
 async def save_category(json_file, async_limit: int = 20) -> list:
+    print(f"========== Saving category: {json_file} ==========")
     downloader = Downloader(async_count=async_limit)
     data = get_grabbed_urls("data/v3/" + json_file + ".json")
     for url_data in data.values():
@@ -149,8 +150,8 @@ class Downloader(AsyncLimiter):
         try:
             r = await client.get(url)
         except:
-            print("FAILED FOR URL:", url)
-            print("FINAL PATH: ", final_path)
+            # print("FAILED FOR URL:", url)
+            # print("FINAL PATH: ", final_path)
             return self.fail(url)
         
         temp_filename = random_string()
