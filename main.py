@@ -19,5 +19,5 @@ if __name__ == "__main__":
     asyncio.run(save_category("Firmware", async_limit=50))
 
     asyncio.run(save_category("Os1", async_limit=30))
-    asyncio.run(save_category("Os2", async_limit=200))
+    asyncio.run(save_category("Os2", async_limit=30))
     # print(file_counter("download/ToolChain"))
