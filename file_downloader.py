@@ -1,39 +1,17 @@
 from asyncio import Task
 import asyncio
 import gc
-import hashlib
 import json
 import os
 import shutil
 from typing import Callable
 
-import urllib
 
 import httpx
 
 from random_utils import random_string
 import variables
-
-categories = ("Os", "Package", "Utility", "Mobile", "ChromeApp", "ToolChain", "Firmware")
-
-existing_keys = ("url", "Last modified", "Size", "Platform", "MD5")
-
-def get_file_path(file_data: dict):
-    url = urllib.parse.unquote(file_data["url"])
-    # fix for LITTERALLY 1 FILE IN PACKAGES THAT HAS \n AND \r IN ITS URL
-    # https://global.synologydownload.com/download/Package/spk/DHCPServer/1.0-2281/DHCPServer-x64\r\n-1.0-2281.spk
-    return url.replace("\n", "").replace("\r", "")
-    # .replace("https://global.synologydownload.com/", "") 
-    # for file_value in file_data.values():
-    #     if "%" in file_value and not "%20" in file_value and not "%2B" in file_value:
-    #         print(file_value)
-            # print(urllib.parse.unquote(file_value))
-    # for file_key in file_data.keys():
-    #     if file_key not in existing_keys:
-    #         print(file_key)
-    #         input()
-
-
+import random_utils
 
 def get_grabbed_urls(json_file) -> dict:
     with open(json_file, "r") as file:
@@ -43,16 +21,16 @@ def get_grabbed_urls(json_file) -> dict:
 async def save_category(json_file, async_limit: int = 20) -> list:
     print(f"========== Saving category: {json_file} ==========")
     downloader = Downloader(async_count=async_limit)
-    data = get_grabbed_urls(f"data/{variables.VERSION}/" + json_file + ".json")
+    data = get_grabbed_urls(f"data/{variables.VERSION}/{json_file}.json")
     for url_data in data.values():
         files = url_data["files"]
         for file in files:
-            downloader.remaining_elements.append(get_file_path(file))
+            downloader.remaining_elements.append(random_utils.get_file_path(file))
 
     await downloader.download_all()
 
 async def save_all_categories() -> dict:
-    for category in categories:
+    for category in variables.CATEGORIES:
         await save_category(category)
 
 

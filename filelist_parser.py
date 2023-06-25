@@ -11,6 +11,7 @@ from bs4.element import Tag
 import httpx
 from asyncio import Task
 import variables
+import random_utils
 
 # @dataclass
 # class File:
@@ -242,18 +243,6 @@ async def download_all():
         count_size(cat)
     
 
-def str_to_kb(size_str: str):
-    size: float
-    if "MB" in size_str:
-        size = float(size_str.replace("MB", "").replace(",", "").strip()) * 1_000
-    elif "KB" in size_str:
-        size = float(size_str.replace("KB", "").replace(",", "").strip())
-    elif "GB" in size_str:
-        size = float(size_str.replace("GB", "").replace(",", "").strip()) * 1_000_000
-    else:
-        print("TF?" + size_str)
-    return size
-
 def count_size(path: str):
     DATA.json_file = f"data/{FILE_VERSION}/{path}.json"
 
@@ -268,7 +257,7 @@ def count_size(path: str):
             if not size:
                 file_no_size += 1
                 continue
-            total_filesize_kb += str_to_kb(size)
+            total_filesize_kb += random_utils.str_to_kb(size)
     print(f"===== CATEGORY: {path} =====")
     print(f"Filecount: {file_count} ({file_no_size} without a size)")
     print(f"Total files size: {int(total_filesize_kb/1_000)}MB ({int(total_filesize_kb/1_000_000)}GB)")
