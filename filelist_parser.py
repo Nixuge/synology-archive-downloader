@@ -4,11 +4,13 @@ import asyncio
 from dataclasses import dataclass
 import json
 import os
+import time
 from typing import Callable
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 import httpx
 from asyncio import Task
+import variables
 
 # @dataclass
 # class File:
@@ -36,7 +38,7 @@ failed_urls: list[str] = []
 files: list[dict] = []
 BASE_URL = "https://archive.synology.com"
 EPIC_STRING = "Downloaded/Remaining tasks: {downloaded!s}/{remaining!s}, Running tasks: {running_tasks!s} (success: {success!s}|fail:{failed!s}|skip:{skipped!s})    "
-FILE_VERSION = "v3"
+FILE_VERSION = variables.VERSION
 POLLING_SLEEP = .2
 
 
@@ -48,18 +50,28 @@ class DATA:
     json_file = ""
 
 
-def get_grabbed_urls() -> dict:
-    with open(DATA.json_file, "r") as file:
-        data = json.load(file)
-    return data
+def get_grabbed_urls(bypass_lock=False) -> dict:
+    try:
+        while not bypass_lock and DATA.json_lock == True:
+            time.sleep(.01)
+        
+        if not bypass_lock: DATA.json_lock = True
+        with open(DATA.json_file, "r") as file:
+            data = json.load(file)
+
+        if not bypass_lock: DATA.json_lock = False
+        return data
+    except:
+        if not bypass_lock: DATA.json_lock = False
+        print("exception! (may or may not be normal)")
+        return None
 
 async def set_grabbed_urls(url: str, files: list[dict], inner_urls: list[str]):
     while DATA.json_lock == True:
         await asyncio.sleep(.01)
-        await set_grabbed_urls(url, files, inner_urls)
     DATA.json_lock = True
 
-    current_data = get_grabbed_urls()
+    current_data = get_grabbed_urls(bypass_lock=True)
     if url in current_data.keys():
         DATA.json_lock = False
         return
@@ -98,7 +110,6 @@ class PageGrabber:
 
     async def get_page(self, url: str) -> list[Callable]:
         full_url = url if "http" in url else BASE_URL + url
-
         grabbed_keys = get_grabbed_urls()
         if url in grabbed_keys.keys():
             DATA.skipped += 1
@@ -206,9 +217,8 @@ async def grab_everything(callable: list[Callable]):
 async def getTaskSetJson(path):
     print(f"======= Grabbing category {path} =======")
     DATA.json_file = f"data/{FILE_VERSION}/{path}.json"
-    try:
-        get_grabbed_urls()
-    except:
+
+    if not get_grabbed_urls():
         if not os.path.exists(f"data/{FILE_VERSION}/"):
             os.makedirs(f"data/{FILE_VERSION}/")
         with open(DATA.json_file, "w") as file:
@@ -250,7 +260,6 @@ def count_size(path: str):
     file_count = 0
     file_no_size = 0
     total_filesize_kb = 0
-
     urls_dict: dict = get_grabbed_urls()
     for key, val in urls_dict.items():
         file_count += 1

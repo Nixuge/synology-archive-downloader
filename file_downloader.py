@@ -12,6 +12,7 @@ import urllib
 import httpx
 
 from random_utils import random_string
+import variables
 
 categories = ("Os", "Package", "Utility", "Mobile", "ChromeApp", "ToolChain", "Firmware")
 
@@ -42,7 +43,7 @@ def get_grabbed_urls(json_file) -> dict:
 async def save_category(json_file, async_limit: int = 20) -> list:
     print(f"========== Saving category: {json_file} ==========")
     downloader = Downloader(async_count=async_limit)
-    data = get_grabbed_urls("data/v3/" + json_file + ".json")
+    data = get_grabbed_urls(f"data/{variables.VERSION}/" + json_file + ".json")
     for url_data in data.values():
         files = url_data["files"]
         for file in files:
