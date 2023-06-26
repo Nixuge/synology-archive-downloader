@@ -33,12 +33,14 @@ def str_to_kb(size_str: str):
         print("TF?" + size_str)
     return size
 
+def get_file_path_str(url: str):
+    url = urllib.parse.unquote(url)
+    return url.replace("\n", "").replace("\r", "")
 
 def get_file_path(file_data: dict):
-    url = urllib.parse.unquote(file_data["url"])
+    return get_file_path_str(file_data["url"])
     # fix for LITTERALLY 1 FILE IN PACKAGES THAT HAS \n AND \r IN ITS URL
     # https://global.synologydownload.com/download/Package/spk/DHCPServer/1.0-2281/DHCPServer-x64\r\n-1.0-2281.spk
-    return url.replace("\n", "").replace("\r", "")
     # .replace("https://global.synologydownload.com/", "") 
     # for file_value in file_data.values():
     #     if "%" in file_value and not "%20" in file_value and not "%2B" in file_value:
