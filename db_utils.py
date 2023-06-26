@@ -30,22 +30,51 @@ def save_category_to_db_close(category: str):
     FILES_CONNECTION.close()
 
 def save_category_to_db(category: str):
-    print("Saving category: " + category)
+    print("\nSaving category: " + category)
     with open(f"data/{variables.VERSION_FULL}/{category}.json") as of:
         data: dict = json.load(of)
-    # save_pages_to_db(category, data)
-    save_files_to_db(category, data)
+    save_pages_to_db(category, data)
+    # save_files_to_db(category, data)
     FILES_CONNECTION.commit()
     FILES_CONNECTION.serialize()
+    PAGES_CONNECTION.commit()
+    PAGES_CONNECTION.serialize()
 
 
 def save_pages_to_db(category: str, data: dict):
+    PAGES_CURSOR.execute(PageQueries.create_file_table(category))
+
     keys = list(data.keys())
     keys.sort()
     
+    for path in keys:
+        if PAGES_CURSOR.execute(PageQueries.is_page_into_table(category, path)).fetchone():
+            print("|", end="")
+            continue
+    
+        current_data = data[path]
+
+        files = current_data["files"]
+        files = [file["url"].replace("https://global.synologydownload.com", "") for file in files]
+        if len(files) == 0 or files == "":
+            files = None
+        else:
+            files = json.dumps(files)
+            
+        inner_urls = current_data["inner_urls"]
+        if len(inner_urls) == 0 or inner_urls == "":
+            inner_urls = None
+        else:
+            inner_urls = json.dumps(inner_urls)
+        
+        PAGES_CURSOR.execute(
+            PageQueries.insert_page_into_table(category),
+            (path, files, inner_urls)
+        )
+    
 
 def save_files_to_db(category: str, data: dict):
-    FILES_CURSOR.execute(create_file_table_query(category))
+    FILES_CURSOR.execute(FileQueries.create_file_table(category))
     ll = len(data.values())
 
     keys = list(data.keys())
@@ -56,7 +85,7 @@ def save_files_to_db(category: str, data: dict):
         print(f"\n{index+1} / {ll} ({key})", end=" ")
         for file in val["files"]:
             path = random_utils.get_file_path(file).replace("https://global.synologydownload.com/", "")
-            if FILES_CURSOR.execute(is_file_into_table_query(category, path)).fetchone():
+            if FILES_CURSOR.execute(FileQueries.is_file_into_table(category, path)).fetchone():
                 print("|", end="")
                 continue
             websitemd5 = file.get("MD5")
@@ -68,7 +97,7 @@ def save_files_to_db(category: str, data: dict):
             actualsize = os.stat(path).st_size
 
             FILES_CURSOR.execute(
-                insert_file_into_table_query(category),
+                FileQueries.insert_file_into_table(category),
                 (path, websitemd5, md5, lastmodified, platform, websitesize, actualsize)
             )
         FILES_CONNECTION.commit()
@@ -79,24 +108,48 @@ def save_files_to_db(category: str, data: dict):
 def get_where_contains_key(table: str, column: str, value: str):
     return f"""SELECT * FROM {table} WHERE {column}=\"{value}\""""
 
-def is_file_into_table_query(table: str, filepath: str):
-    return get_where_contains_key(table, "path", filepath)
+class PageQueries:
+    @staticmethod
+    def is_page_into_table(table: str, filepath: str):
+        return get_where_contains_key(table, "path", filepath)
 
-def insert_file_into_table_query(table: str):
-    return f"""INSERT INTO {table} VALUES (?,?,?,?,?,?,?);"""
+    @staticmethod
+    def insert_page_into_table(table: str):
+        return f"""INSERT INTO {table} VALUES (?,?,?);"""
 
-def create_file_table_query(table: str):
-    return f"""CREATE TABLE IF NOT EXISTS {table} (
-            path TEXT NOT NULL,
+    @staticmethod
+    def create_file_table(table: str):
+        return f"""CREATE TABLE IF NOT EXISTS {table} (
+                path TEXT NOT NULL,
 
-            websitemd5 CHAR(32),
-            md5 CHAR(32),
+                files TEXT,
+                innerurls TEXT,
 
-            lastmodified TEXT,
-            platform TEXT,
+                PRIMARY KEY (path)
+                );"""
 
-            websitesize TEXT,
-            actualsize INTEGER,
+class FileQueries:
+    @staticmethod
+    def is_file_into_table(table: str, filepath: str):
+        return get_where_contains_key(table, "path", filepath)
+    
+    @staticmethod
+    def insert_file_into_table(table: str):
+        return f"""INSERT INTO {table} VALUES (?,?,?,?,?,?,?);"""
 
-            PRIMARY KEY (path)
-            );"""
+    @staticmethod
+    def create_file_table(table: str):
+        return f"""CREATE TABLE IF NOT EXISTS {table} (
+                path TEXT NOT NULL,
+
+                websitemd5 CHAR(32),
+                md5 CHAR(32),
+
+                lastmodified TEXT,
+                platform TEXT,
+
+                websitesize TEXT,
+                actualsize INTEGER,
+
+                PRIMARY KEY (path)
+                );"""
