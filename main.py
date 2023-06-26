@@ -1,6 +1,6 @@
 #!/bin/python3
 import asyncio
-from db_utils import save_all_to_db
+from db_utils import save_all_to_db, save_category_to_db_close
 from file_downloader import save_category, save_all_categories
 from filelist_parser import download_all
 from json_merger import merge_all_categories_v3_v3purged
@@ -23,3 +23,4 @@ if __name__ == "__main__":
     # print(file_counter("download/ToolChain"))
     # merge_all_categories_v3_v3purged()
     save_all_to_db()
+    # save_category_to_db_close("ToolChain")
