@@ -1,15 +1,19 @@
+import asyncio
 import json
 import os
 from pprint import pprint
-from internetarchive import get_item
+import threading
+import time
+from internetarchive import get_item, get_files
 from requests.models import Response
+from file_downloader import AsyncLimiter
 import random_utils
 
 #CACHE_FILE
 CF = "cache/webarchive_packages.cache"
 
 def add_to_cache(path: str):
-    with open(CF, "w") as of:
+    with open(CF, "a") as of:
         of.write(path + "\n")
 
 def is_in_cache(path: str) -> bool:
@@ -25,24 +29,36 @@ def is_in_cache(path: str) -> bool:
 
 def upload_path(path: str):
     if is_in_cache(path):
-        print("Already in cache: " + path)
-        return
+        # print("Already in cache: " + path)
+        return False
+    # print("Uploading: " + path)
 
     md = {'collection': 'Software', 'title': 'archive.synology.com (pre purge)', 'mediatype': 'software'}
     item = get_item("archive.synology.com_packages_aaa-hyb")
-    responses: list[Response] = item.upload(files=[path], metadata=md, verbose=True)
+    responses: list[Response] = item.upload(files=[path], metadata=md, verbose=False)
 
     # filepath = '/'.join(r.url.split('/')[4:])
 
     all_good = True
     for r in responses:
         if r.status_code != 200:
+            print("SOME ERROR!!!")
             all_good = False
     
     if all_good:
         add_to_cache(path)
 
+    return True
+
     # print(r[0].status_code)
+
+
+def check_pathes_valid(path_list: list[str]):
+    archive_pathes = [f.name for f in get_files('archive.synology.com_packages_aaa-hyb')]
+    for path in path_list:
+        if path not in archive_pathes:
+            print("MISSING FILE: " + path)
+    # print(archive_pathes)
 
 
 class FolderFinder:
@@ -122,9 +138,42 @@ class FolderFinder:
         return valid_dirs
 
 
-if __name__ == "__main__":
+class ArchiveUploader:
+    def __init__(self, thread_count: int = 20) -> None:
+        self.thread_count = thread_count
+        self.threads: list[threading.Thread] = []
+
+    def clean_threads(self):
+        for thread in self.threads:
+            if not thread.is_alive():
+                self.threads.remove(thread)
+    
+    def save(self, path: str):
+        t = threading.Thread(target=upload_path, args=(path,))
+        t.start()
+        self.threads.append(t)
+    
+    def save_all(self, path_list: list[str]):
+        while len(path_list) > 0:
+            print(f"\r[ArchiveUploader] running: {len(self.threads)}, remaining: {len(path_list)}", end="     ")
+            if len(self.threads) < self.thread_count:
+                self.save(path_list[0])
+                path_list.pop(0)
+            
+            self.clean_threads()
+
+            time.sleep(.1)
+    
+
+async def main():
     pkg1 = FolderFinder("download/Package/spk", "aaa", "hyb").find()
-    for folder in pkg1:
-        full_path = f"download/Package/spk/{folder}"
-        upload_path(full_path)
+    pkg1_fixed = [f"download/Package/spk/{folder}" for folder in pkg1]
+
+    uploader = ArchiveUploader()
+    uploader.save_all(pkg1_fixed)
+    # check_pathes_valid(None)
+
+    # upload_path(full_path)
+if __name__ == "__main__":
+    asyncio.run(main())
     # upload_path('download/Package/spk/AcronisTrueImage')
