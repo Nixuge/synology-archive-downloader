@@ -34,7 +34,7 @@ def upload_path(path: str):
     # print("Uploading: " + path)
 
     md = {'collection': 'Software', 'title': 'archive.synology.com (pre purge)', 'mediatype': 'software'}
-    item = get_item("archive.synology.com_packages_aaa-hyb")
+    item = get_item(CURRENT_ID)
     responses: list[Response] = item.upload(files=[path], metadata=md, verbose=False)
 
     # filepath = '/'.join(r.url.split('/')[4:])
@@ -54,7 +54,7 @@ def upload_path(path: str):
 
 
 def check_pathes_valid(path_list: list[str]):
-    archive_pathes = [f.name for f in get_files('archive.synology.com_packages_aaa-hyb')]
+    archive_pathes = [f.name for f in get_files(CURRENT_ID)]
     for path in path_list:
         if path not in archive_pathes:
             print("MISSING FILE: " + path)
@@ -139,7 +139,7 @@ class FolderFinder:
 
 
 class ArchiveUploader:
-    def __init__(self, thread_count: int = 20) -> None:
+    def __init__(self, thread_count: int = 1) -> None:
         self.thread_count = thread_count
         self.threads: list[threading.Thread] = []
 
@@ -155,7 +155,7 @@ class ArchiveUploader:
     
     def save_all(self, path_list: list[str]):
         while len(path_list) > 0:
-            print(f"\r[ArchiveUploader] running: {len(self.threads)}, remaining: {len(path_list)}", end="     ")
+            print(f"\r[ArchiveUploader] running: {len(self.threads)}, remaining: {len(path_list)}     |", end="")
             if len(self.threads) < self.thread_count:
                 self.save(path_list[0])
                 path_list.pop(0)
@@ -167,13 +167,29 @@ class ArchiveUploader:
 
 async def main():
     pkg1 = FolderFinder("download/Package/spk", "aaa", "hyb").find()
-    pkg1_fixed = [f"download/Package/spk/{folder}" for folder in pkg1]
+    
+    pkg2 = FolderFinder("download/Package/spk", "hyperb", "python").find()
+    pkg2.remove("Python2")
+    pkg2.remove("Python3.9")
+    pkg2.remove("PythonModule")
 
+    pkg3 = FolderFinder("download/Package/spk", "python", "zarafa").find()
+    pkg3.remove("Python")
+
+    pkg_fixed = [f"download/Package/spk/{folder}" for folder in pkg1]
     uploader = ArchiveUploader()
-    uploader.save_all(pkg1_fixed)
+    uploader.save_all(pkg_fixed)
+
     # check_pathes_valid(None)
 
     # upload_path(full_path)
+
+PKG1 = 'archive.synology.com_packages_aaa-hyb'
+PKG2 = 'archive.synology.com_packages_hyp-python'
+# PKG3 = 'archive.synology.com_packages_aaa-hyb'
+
+CURRENT_ID = PKG1
+
 if __name__ == "__main__":
     asyncio.run(main())
     # upload_path('download/Package/spk/AcronisTrueImage')
